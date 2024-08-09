@@ -67,10 +67,10 @@ const StockChart = () => {
   }, []);
 
   return (
-    <div className="lg:max-w-4xl mx-auto mt-10 p-4 bg-slate-700 text-blue-900 shadow-md rounded-lg border h-[600px]">
+    <div className="lg:max-w-4xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border h-[600px]">
       {!!series && (
         <>
-          <h1 className="text-xl font-bold mb-4">{options.title?.text}</h1>
+          {/* <h1 className="text-xl font-bold mb-4">{options.title?.text}</h1> */}
           <ReactApexChart
             options={options}
             series={series}
