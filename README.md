@@ -86,4 +86,3 @@ To run the project locally, follow these steps:
 Once the app is running, you can start exploring NYSE stock data. Simply select a stock symbol and the chart will display the relevant data.
 
 
-```
