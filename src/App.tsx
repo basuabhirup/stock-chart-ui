@@ -2,8 +2,18 @@ import { useState, useEffect } from "react";
 import ReactApexChart from "react-apexcharts";
 import axios from "axios";
 import { ApexOptions } from "apexcharts";
-import { Option, Select, Spinner, Typography } from "@material-tailwind/react";
+import {
+  Card,
+  IconButton,
+  Input,
+  Option,
+  Select,
+  Spinner,
+  Typography,
+} from "@material-tailwind/react";
 import { IDataResolutions, IParams } from "./utils/interfaces";
+
+const DEBOUNCE_DELAY = 300;
 
 const dataResolutions: IDataResolutions = {
   daily: {
@@ -31,6 +41,9 @@ const StockChart = () => {
   >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const [params, setParams] = useState<IParams>({
     symbol: "IBM",
@@ -64,6 +77,9 @@ const StockChart = () => {
       tooltip: {
         enabled: true,
       },
+    },
+    theme: {
+      mode: "light",
     },
   });
 
@@ -111,6 +127,37 @@ const StockChart = () => {
     }
   };
 
+  const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value as string;
+    setSearchTerm(value);
+  };
+
+  const handleSearch = async () => {
+    try {
+      const url = `${
+        import.meta.env.VITE_API_BASE_URL
+      }?function=SYMBOL_SEARCH&keywords=${searchTerm}&apikey=${
+        import.meta.env.VITE_API_KEY
+      }`;
+
+      const response = await axios.get(url);
+      const results = response.data?.bestMatches || [];
+
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Error searching symbols:", error);
+    }
+  };
+
+  const handleSymbolSelect = (symbol: string) => {
+    setParams((prev) => ({
+      ...prev,
+      symbol,
+    }));
+    setSearchTerm("");
+    setSearchResults([]);
+  };
+
   const handleResolutionChange = (val: string) => {
     if (
       val !== "daily" &&
@@ -147,6 +194,17 @@ const StockChart = () => {
   };
 
   useEffect(() => {
+    if (!searchTerm) return;
+
+    const debounceTimer = setTimeout(async () => {
+      handleSearch();
+    }, DEBOUNCE_DELAY);
+
+    return () => clearTimeout(debounceTimer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
+
+  useEffect(() => {
     fetchData();
     setOptions((prevValue) => ({
       ...prevValue,
@@ -161,8 +219,54 @@ const StockChart = () => {
   }, [params]);
 
   return (
-    <div className="lg:max-w-4xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border h-[660px]">
-      <div className="flex gap-4 mb-8">
+    <div className="lg:max-w-4xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border min-h-[660px]">
+      <div className="flex gap-4 mb-8 flex-wrap">
+        <div className="w-full md:max-w-48 mr-2">
+          <div className="relative flex w-full gap-2 md:w-max">
+            <Input
+              type="search"
+              color="blue"
+              label="Search Company"
+              value={searchTerm}
+              onChange={handleSearchInput}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+              crossOrigin={undefined}
+            />
+            <IconButton
+              placeholder={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+              color="white"
+              className="!absolute right-1 top-1 rounded"
+              size="sm"
+            >
+              <i className="fas fa-search" />
+            </IconButton>
+          </div>
+
+          {searchResults.length > 0 && (
+            <Card
+              className="absolute z-50 mt-2 max-h-60 overflow-y-auto border rounded"
+              placeholder={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+            >
+              <ul>
+                {searchResults.map((result) => (
+                  <li
+                    key={result["1. symbol"]}
+                    onClick={() => handleSymbolSelect(result["1. symbol"])}
+                    className="p-2 cursor-pointer hover:bg-gray-200"
+                  >
+                    {result["2. name"]} ({result["1. symbol"]})
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </div>
+
         <div className="w-48">
           <Select
             color="blue"
@@ -235,7 +339,6 @@ const StockChart = () => {
 
       {!!series && !isLoading && errorMessage.length === 0 && (
         <>
-          {/* <h1 className="text-xl font-bold mb-4">{options.title?.text}</h1> */}
           <ReactApexChart
             options={options}
             series={series}
