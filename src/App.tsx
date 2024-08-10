@@ -2,20 +2,54 @@ import { useState, useEffect } from "react";
 import ReactApexChart from "react-apexcharts";
 import axios from "axios";
 import { ApexOptions } from "apexcharts";
+import { Option, Select, Spinner, Typography } from "@material-tailwind/react";
+import { IDataResolutions, IParams } from "./utils/interfaces";
+
+const dataResolutions: IDataResolutions = {
+  daily: {
+    function: "TIME_SERIES_DAILY",
+    objName: "Time Series (Daily)",
+  },
+  weekly: {
+    function: "TIME_SERIES_WEEKLY",
+    objName: "Weekly Time Series",
+  },
+  monthly: {
+    function: "TIME_SERIES_MONTHLY",
+    objName: "Monthly Time Series",
+  },
+  intraday: {
+    function: "TIME_SERIES_INTRADAY",
+    interval: "5min",
+    objName: `Time Series (5min)`,
+  },
+};
 
 const StockChart = () => {
   const [series, setSeries] = useState<
     ApexAxisChartSeries | ApexNonAxisChartSeries | undefined
   >();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const [options] = useState<ApexOptions>({
+  const [params, setParams] = useState<IParams>({
+    symbol: "IBM",
+    resolution: "daily",
+    function: "TIME_SERIES_DAILY",
+    objName: dataResolutions["daily"].objName,
+    interval: undefined,
+  });
+
+  const [options, setOptions] = useState<ApexOptions>({
     chart: {
       type: "candlestick",
       height: 450,
     },
     title: {
-      text: "AAPL Intraday Stock Data",
-      align: "center",
+      text: `${params.symbol} ${
+        params.resolution[0].toUpperCase() + params.resolution.slice(1)
+      } Stock Data`,
+      align: "left",
     },
     tooltip: {
       enabled: true,
@@ -34,17 +68,26 @@ const StockChart = () => {
   });
 
   const fetchData = async () => {
-    const symbol = "AAPL";
-    const interval = "15min";
+    const func = params.function;
+    const symbol = params.symbol;
+    const interval = params.interval;
+    const objName = params.objName;
     const url = `${
       import.meta.env.VITE_API_BASE_URL
-    }?function=TIME_SERIES_DAILY&symbol=${symbol}&interval=${interval}&apikey=${
+    }?function=${func}&symbol=${symbol}&interval=${interval}&apikey=${
       import.meta.env.VITE_API_KEY
     }`;
 
+    setIsLoading(true);
+    setErrorMessage("");
+
     try {
       const response = await axios.get(url);
-      const data = response.data["Time Series (Daily)"];
+      const data = response.data[objName];
+
+      if (!data) {
+        throw new Error(response.data.Information);
+      }
 
       const seriesData = Object.keys(data).map((time) => ({
         x: new Date(time),
@@ -57,25 +100,104 @@ const StockChart = () => {
       }));
 
       setSeries([{ data: seriesData }]);
-    } catch (error) {
+      setIsLoading(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error.message) {
+        setErrorMessage(error.message);
+      }
       console.error("Error fetching data:", error);
+      setIsLoading(false);
     }
+  };
+
+  const handleResolutionChange = (val: string) => {
+    if (
+      val !== "daily" &&
+      val !== "weekly" &&
+      val !== "monthly" &&
+      val !== "intraday"
+    ) {
+      return;
+    }
+    setParams((prev) => ({
+      ...prev,
+      resolution: val,
+      function: dataResolutions[val].function,
+      objName: dataResolutions[val].objName,
+      interval: val === "intraday" ? dataResolutions[val].interval : undefined,
+    }));
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+    setOptions((prevValue) => ({
+      ...prevValue,
+      title: {
+        ...prevValue.title,
+        text: `${params.symbol} ${
+          params.resolution[0].toUpperCase() + params.resolution.slice(1)
+        } Stock Data`,
+      },
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
 
   return (
-    <div className="lg:max-w-4xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border h-[600px]">
-      {!!series && (
+    <div className="lg:max-w-4xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border h-[660px]">
+      <div className="w-24 mb-8">
+        <Select
+          color="blue"
+          label="Select Temporal Resolution"
+          animate={{
+            mount: { y: 0 },
+            unmount: { y: 25 },
+          }}
+          placeholder={"Daily"}
+          value={params.resolution}
+          onChange={(val) => handleResolutionChange(val as string)}
+          onPointerEnterCapture={undefined}
+          onPointerLeaveCapture={undefined}
+        >
+          {["daily", "weekly", "monthly", "intraday"].map((resolution) => (
+            <Option value={resolution}>
+              {resolution[0].toUpperCase() + resolution.slice(1)}
+            </Option>
+          ))}
+        </Select>
+      </div>
+      {(!series || isLoading || errorMessage.length > 0) && (
+        <div className="flex flex-col justify-center items-center gap-y-2 h-[450px]">
+          {isLoading && (
+            <Spinner
+              className="h-16 w-16 text-gray-900/50"
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+            />
+          )}
+          {errorMessage.length > 0 && !isLoading && (
+            <Typography
+              placeholder={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+              className="mx-12 font-extralight leading-loose"
+              variant="paragraph"
+              color="gray"
+            >
+              {errorMessage}
+            </Typography>
+          )}
+        </div>
+      )}
+
+      {!!series && !isLoading && errorMessage.length === 0 && (
         <>
           {/* <h1 className="text-xl font-bold mb-4">{options.title?.text}</h1> */}
           <ReactApexChart
             options={options}
             series={series}
             type="candlestick"
-            height={450}
+            height={550}
           />
         </>
       )}
