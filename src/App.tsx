@@ -247,7 +247,7 @@ const StockChart = () => {
   }, [isDark]);
 
   return (
-    <div className="lg:max-w-6xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border min-h-[660px] dark:bg-gray-800">
+    <div className="lg:max-w-4xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border min-h-[660px] dark:bg-gray-800">
       <div className="flex gap-4 mb-8 flex-wrap">
         <div className="w-full md:max-w-48 mr-2">
           <div className="relative flex w-full gap-2 md:w-max">
@@ -345,7 +345,7 @@ const StockChart = () => {
         <div className="w-12 ml-auto">
           <Button
             onClick={toggleDarkTheme}
-            className="h-8 w-8 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="h-8 w-8 rounded-lg p-2 hover:bg-gray-400 dark:hover:bg-gray-700"
             placeholder={undefined}
             onPointerEnterCapture={undefined}
             onPointerLeaveCapture={undefined}
