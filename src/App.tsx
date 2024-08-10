@@ -3,6 +3,7 @@ import ReactApexChart from "react-apexcharts";
 import axios from "axios";
 import { ApexOptions } from "apexcharts";
 import {
+  Button,
   Card,
   IconButton,
   Input,
@@ -44,6 +45,7 @@ const StockChart = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isDark, setIsDark] = useState<boolean>(false);
 
   const [params, setParams] = useState<IParams>({
     symbol: "IBM",
@@ -194,6 +196,11 @@ const StockChart = () => {
     }));
   };
 
+  const toggleDarkTheme = () => {
+    setIsDark((prev) => !prev);
+    document.body.classList.toggle("dark");
+  };
+
   useEffect(() => {
     if (!searchTerm) return;
 
@@ -229,14 +236,24 @@ const StockChart = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
+  useEffect(() => {
+    setOptions((prevOptions) => ({
+      ...prevOptions,
+      theme: {
+        ...prevOptions.theme,
+        mode: isDark ? "dark" : "light",
+      },
+    }));
+  }, [isDark]);
+
   return (
-    <div className="lg:max-w-4xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border min-h-[660px]">
+    <div className="lg:max-w-6xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border min-h-[660px] dark:bg-gray-800">
       <div className="flex gap-4 mb-8 flex-wrap">
         <div className="w-full md:max-w-48 mr-2">
           <div className="relative flex w-full gap-2 md:w-max">
             <Input
               type="search"
-              color="blue"
+              color={isDark ? "white" : "blue"}
               label="Search Company"
               value={searchTerm}
               onChange={handleSearchInput}
@@ -248,7 +265,7 @@ const StockChart = () => {
               placeholder={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
-              color="white"
+              color={isDark ? "black" : "white"}
               className="!absolute right-1 top-1 rounded"
               size="sm"
             >
@@ -268,7 +285,7 @@ const StockChart = () => {
                   <li
                     key={result["1. symbol"]}
                     onClick={() => handleSymbolSelect(result["1. symbol"])}
-                    className="p-2 cursor-pointer hover:bg-gray-200"
+                    className="p-2 cursor-pointer bg-gray-100 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:text-gray-100 dark:hover:bg-gray-700"
                   >
                     {result["2. name"]} ({result["1. symbol"]})
                   </li>
@@ -291,6 +308,7 @@ const StockChart = () => {
             onChange={(val) => handleResolutionChange(val as string)}
             onPointerEnterCapture={undefined}
             onPointerLeaveCapture={undefined}
+            className="dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:text-gray-100 dark:hover:bg-gray-700"
           >
             {["daily", "weekly", "monthly", "intraday"].map((resolution) => (
               <Option key={resolution} value={resolution}>
@@ -312,6 +330,7 @@ const StockChart = () => {
               placeholder="5min"
               value={params.interval}
               onChange={(val) => handleIntervalChange(val as string)}
+              className="dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:text-gray-100 dark:hover:bg-gray-700"
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
             >
@@ -323,6 +342,35 @@ const StockChart = () => {
             </Select>
           </div>
         )}
+        <div className="w-12 ml-auto">
+          <Button
+            onClick={toggleDarkTheme}
+            className="h-8 w-8 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+            placeholder={undefined}
+            onPointerEnterCapture={undefined}
+            onPointerLeaveCapture={undefined}
+            size="sm"
+          >
+            <svg
+              className="fill-violet-700 block dark:hidden"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+            </svg>
+            <svg
+              className="fill-yellow-500 hidden dark:block"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+          </Button>
+        </div>
       </div>
       {(!series || isLoading || errorMessage.length > 0) && (
         <div className="flex flex-col justify-center items-center gap-y-2 h-[450px]">
@@ -331,6 +379,7 @@ const StockChart = () => {
               className="h-16 w-16 text-gray-900/50"
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
+              color={isDark ? "blue" : "gray"}
             />
           )}
           {errorMessage.length > 0 && !isLoading && (
