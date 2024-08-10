@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import ReactApexChart from "react-apexcharts";
 import axios from "axios";
 import { ApexOptions } from "apexcharts";
-import { Spinner, Typography } from "@material-tailwind/react";
 import { IDataResolutions, IParams } from "./utils/interfaces";
 import ThemeToggleButton from "./components/ThemeToggleButton";
 import DropdownSelector from "./components/DropDownSelector";
 import StockSearch from "./components/StockSearch";
+import StockChart from "./components/StockChart";
 
 const dataResolutions: IDataResolutions = {
   daily: {
@@ -28,7 +27,7 @@ const dataResolutions: IDataResolutions = {
   },
 };
 
-const StockChart = () => {
+const App = () => {
   const [series, setSeries] = useState<
     ApexAxisChartSeries | ApexNonAxisChartSeries | undefined
   >();
@@ -233,43 +232,15 @@ const StockChart = () => {
           <ThemeToggleButton toggleDarkTheme={toggleDarkTheme} />
         </div>
       </div>
-      {(!series || isLoading || errorMessage.length > 0) && (
-        <div className="flex flex-col justify-center items-center gap-y-2 h-[450px]">
-          {isLoading && (
-            <Spinner
-              className="h-16 w-16 text-gray-900/50"
-              onPointerEnterCapture={undefined}
-              onPointerLeaveCapture={undefined}
-              color={isDark ? "blue" : "gray"}
-            />
-          )}
-          {errorMessage.length > 0 && !isLoading && (
-            <Typography
-              placeholder={undefined}
-              onPointerEnterCapture={undefined}
-              onPointerLeaveCapture={undefined}
-              className="mx-12 font-extralight leading-relaxed"
-              variant="small"
-              color={isDark ? "white" : "gray"}
-            >
-              {errorMessage}
-            </Typography>
-          )}
-        </div>
-      )}
-
-      {!!series && !isLoading && errorMessage.length === 0 && (
-        <>
-          <ReactApexChart
-            options={options}
-            series={series}
-            type="candlestick"
-            height={550}
-          />
-        </>
-      )}
+      <StockChart
+        series={series}
+        options={options}
+        isLoading={isLoading}
+        errorMessage={errorMessage}
+        isDark={isDark}
+      />
     </div>
   );
 };
 
-export default StockChart;
+export default App;
