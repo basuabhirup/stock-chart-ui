@@ -129,6 +129,23 @@ const StockChart = () => {
     }));
   };
 
+  const handleIntervalChange = (val: string) => {
+    if (
+      val !== "1min" &&
+      val !== "5min" &&
+      val !== "15min" &&
+      val !== "30min" &&
+      val !== "60min"
+    ) {
+      return;
+    }
+    setParams((prev) => ({
+      ...prev,
+      interval: val,
+      objName: `Time Series (${val})`,
+    }));
+  };
+
   useEffect(() => {
     fetchData();
     setOptions((prevValue) => ({
@@ -145,26 +162,52 @@ const StockChart = () => {
 
   return (
     <div className="lg:max-w-4xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border h-[660px]">
-      <div className="w-24 mb-8">
-        <Select
-          color="blue"
-          label="Select Temporal Resolution"
-          animate={{
-            mount: { y: 0 },
-            unmount: { y: 25 },
-          }}
-          placeholder={"Daily"}
-          value={params.resolution}
-          onChange={(val) => handleResolutionChange(val as string)}
-          onPointerEnterCapture={undefined}
-          onPointerLeaveCapture={undefined}
-        >
-          {["daily", "weekly", "monthly", "intraday"].map((resolution) => (
-            <Option value={resolution}>
-              {resolution[0].toUpperCase() + resolution.slice(1)}
-            </Option>
-          ))}
-        </Select>
+      <div className="flex gap-4 mb-8">
+        <div className="w-48">
+          <Select
+            color="blue"
+            label="Select Temporal Resolution"
+            animate={{
+              mount: { y: 0 },
+              unmount: { y: 25 },
+            }}
+            placeholder={"Daily"}
+            value={params.resolution}
+            onChange={(val) => handleResolutionChange(val as string)}
+            onPointerEnterCapture={undefined}
+            onPointerLeaveCapture={undefined}
+          >
+            {["daily", "weekly", "monthly", "intraday"].map((resolution) => (
+              <Option key={resolution} value={resolution}>
+                {resolution[0].toUpperCase() + resolution.slice(1)}
+              </Option>
+            ))}
+          </Select>
+        </div>
+
+        {params.resolution === "intraday" && (
+          <div className="w-48">
+            <Select
+              color="blue"
+              label="Select Interval"
+              animate={{
+                mount: { y: 0 },
+                unmount: { y: 25 },
+              }}
+              placeholder="5min"
+              value={params.interval}
+              onChange={(val) => handleIntervalChange(val as string)}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+            >
+              {["1min", "5min", "15min", "30min", "60min"].map((interval) => (
+                <Option key={interval} value={interval}>
+                  {interval}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        )}
       </div>
       {(!series || isLoading || errorMessage.length > 0) && (
         <div className="flex flex-col justify-center items-center gap-y-2 h-[450px]">
@@ -180,8 +223,8 @@ const StockChart = () => {
               placeholder={undefined}
               onPointerEnterCapture={undefined}
               onPointerLeaveCapture={undefined}
-              className="mx-12 font-extralight leading-loose"
-              variant="paragraph"
+              className="mx-12 font-extralight leading-relaxed"
+              variant="small"
               color="gray"
             >
               {errorMessage}
