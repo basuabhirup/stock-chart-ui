@@ -1,22 +1,12 @@
 import { Spinner, Typography } from "@material-tailwind/react";
-import { ApexOptions } from "apexcharts";
+import { useContext } from "react";
 import ReactApexChart from "react-apexcharts";
+import StockContext from "../context/StockContext";
 
-interface IProps {
-  isDark: boolean;
-  series: ApexAxisChartSeries | ApexNonAxisChartSeries | undefined;
-  options: ApexOptions;
-  isLoading: boolean;
-  errorMessage: string;
-}
+const StockChart: React.FC = () => {
+  const { series, options, isLoading, errorMessage, isDark } =
+    useContext(StockContext);
 
-const StockChart: React.FC<IProps> = ({
-  series,
-  options,
-  isLoading,
-  errorMessage,
-  isDark,
-}) => {
   return (
     <>
       {(!series || isLoading || errorMessage.length > 0) && (

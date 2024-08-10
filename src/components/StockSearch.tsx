@@ -1,15 +1,12 @@
 import { Card, IconButton, Input } from "@material-tailwind/react";
 import axios from "axios";
-import { useEffect, useState } from "react";
-
-interface IProps {
-  isDark: boolean;
-  handleSymbolSelect: (symbol: string) => void;
-}
+import { useContext, useEffect, useState } from "react";
+import StockContext from "../context/StockContext";
 
 const DEBOUNCE_DELAY = 300;
 
-const StockSearch: React.FC<IProps> = ({ isDark, handleSymbolSelect }) => {
+const StockSearch: React.FC = () => {
+  const { isDark, handleSymbolSelect } = useContext(StockContext);
   const [searchTerm, setSearchTerm] = useState<string>("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [searchResults, setSearchResults] = useState<any[]>([]);

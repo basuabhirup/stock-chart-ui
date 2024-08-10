@@ -1,3 +1,5 @@
+import { ApexOptions } from "apexcharts";
+
 export interface IDataResolutions {
   daily: {
     function: "TIME_SERIES_DAILY";
@@ -28,4 +30,17 @@ export interface IParams {
   symbol: string;
   objName: string;
   interval?: "1min" | "5min" | "15min" | "30min" | "60min";
+}
+
+export interface IStockContext {
+  series: ApexAxisChartSeries | ApexNonAxisChartSeries | undefined;
+  isLoading: boolean;
+  errorMessage: string;
+  isDark: boolean;
+  options: ApexOptions;
+  params: IParams;
+  handleSymbolSelect: (symbol: string) => void;
+  handleResolutionChange: (val: string) => void;
+  handleIntervalChange: (val: string) => void;
+  toggleDarkTheme: () => void;
 }
