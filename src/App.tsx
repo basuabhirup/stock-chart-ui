@@ -200,7 +200,7 @@ const App = () => {
   }, [isDark]);
 
   return (
-    <div className="lg:max-w-4xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border min-h-[660px] dark:bg-gray-800">
+    <div className="lg:max-w-4xl w-[90vw] mx-auto mt-10 p-4 bg-slate-100 text-blue-950 shadow-md rounded-lg border min-h-[660px] bg-white dark:bg-gray-800">
       <div className="flex gap-4 mb-8 flex-wrap">
         <div className="w-full md:max-w-48 mr-2">
           <StockSearch
