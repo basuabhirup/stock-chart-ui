@@ -71,6 +71,7 @@ const StockChart = () => {
       type: "datetime",
       tooltip: {
         enabled: true,
+        formatter: (value) => new Date(value).toLocaleDateString(),
       },
     },
     yaxis: {
@@ -213,6 +214,16 @@ const StockChart = () => {
         text: `${params.symbol} ${
           params.resolution[0].toUpperCase() + params.resolution.slice(1)
         } Stock Data`,
+      },
+      xaxis: {
+        ...prevValue.xaxis,
+        tooltip: {
+          ...prevValue.xaxis?.tooltip,
+          formatter: (value) =>
+            params.resolution === "intraday"
+              ? new Date(value).toLocaleString("en-GB")
+              : new Date(value).toLocaleDateString(),
+        },
       },
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
