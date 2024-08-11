@@ -1,6 +1,8 @@
 # Stock Chart UI 📈
 
-**A stock chart visualization app using NYSE data powered by the Alpha Vantage API.**
+A stock chart visualization app using NYSE data powered by the Alpha Vantage API.
+
+**Live Demo:** https://stock-chart-ui.vercel.app
 
 ## Table of Contents
 
