@@ -4,6 +4,10 @@ A stock chart visualization app using NYSE data powered by the Alpha Vantage API
 
 **Live Demo:** https://stock-chart-ui.vercel.app
 
+
+https://github.com/user-attachments/assets/d58c33f6-89a2-4d42-a633-b461b2bf7913
+
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -66,7 +70,7 @@ To run the project locally, follow these steps:
 
 1. **Set up environment variables:**
 
-   Create a `.env` file in the root directory and add your Alpha Vantage API key:
+   Create a `.env` file in the root directory and add your [Alpha Vantage API key](https://www.alphavantage.co/support/#api-key):
 
    ```env
    VITE_API_KEY=your_alpha_vantage_api_key
