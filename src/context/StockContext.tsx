@@ -73,7 +73,7 @@ export const StockProvider = ({ children }: { children: React.ReactNode }) => {
       title: {
         text: `${params.symbol} ${
           params.resolution[0].toUpperCase() + params.resolution.slice(1)
-        } Stock Data`,
+        } Stock Data${params.interval ? ` (${params.interval} Interval)` : ""}`,
         align: "left",
       },
       tooltip: {
