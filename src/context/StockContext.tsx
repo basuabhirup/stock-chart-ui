@@ -1,4 +1,10 @@
-import { createContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import axios from "axios";
 import { IDataResolutions, IParams, IStockContext } from "../utils/interfaces";
 import { ApexOptions } from "apexcharts";
@@ -58,38 +64,44 @@ export const StockProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [params, setParams] = useState<IParams>(defaultParams);
 
-  const [options, setOptions] = useState<ApexOptions>({
-    chart: {
-      type: "candlestick",
-      height: 450,
-    },
-    title: {
-      text: `${params.symbol} ${
-        params.resolution[0].toUpperCase() + params.resolution.slice(1)
-      } Stock Data`,
-      align: "left",
-    },
-    tooltip: {
-      enabled: true,
-    },
-    xaxis: {
-      type: "datetime",
-      tooltip: {
-        enabled: true,
-        formatter: (value) => new Date(value).toLocaleDateString(),
+  const options = useMemo<ApexOptions>(
+    () => ({
+      chart: {
+        type: "candlestick",
+        height: 450,
       },
-    },
-    yaxis: {
+      title: {
+        text: `${params.symbol} ${
+          params.resolution[0].toUpperCase() + params.resolution.slice(1)
+        } Stock Data`,
+        align: "left",
+      },
       tooltip: {
         enabled: true,
       },
-    },
-    theme: {
-      mode: "light",
-    },
-  });
+      xaxis: {
+        type: "datetime",
+        tooltip: {
+          enabled: true,
+          formatter: (value) =>
+            params.resolution === "intraday"
+              ? new Date(value).toUTCString()
+              : new Date(value).toDateString(),
+        },
+      },
+      yaxis: {
+        tooltip: {
+          enabled: true,
+        },
+      },
+      theme: {
+        mode: isDark ? "dark" : "light",
+      },
+    }),
+    [isDark, params]
+  );
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const func = params.function;
     const symbol = params.symbol;
     const interval = params.interval;
@@ -131,16 +143,16 @@ export const StockProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Error fetching data:", error);
       setIsLoading(false);
     }
-  };
+  }, [params]);
 
-  const handleSymbolSelect = (symbol: string) => {
+  const handleSymbolSelect = useCallback((symbol: string) => {
     setParams((prev) => ({
       ...prev,
       symbol,
     }));
-  };
+  }, []);
 
-  const handleResolutionChange = (val: string) => {
+  const handleResolutionChange = useCallback((val: string) => {
     if (
       val !== "daily" &&
       val !== "weekly" &&
@@ -156,9 +168,9 @@ export const StockProvider = ({ children }: { children: React.ReactNode }) => {
       objName: dataResolutions[val].objName,
       interval: val === "intraday" ? dataResolutions[val].interval : undefined,
     }));
-  };
+  }, []);
 
-  const handleIntervalChange = (val: string) => {
+  const handleIntervalChange = useCallback((val: string) => {
     if (
       val !== "1min" &&
       val !== "5min" &&
@@ -173,7 +185,7 @@ export const StockProvider = ({ children }: { children: React.ReactNode }) => {
       interval: val,
       objName: `Time Series (${val})`,
     }));
-  };
+  }, []);
 
   const toggleDarkTheme = () => {
     setIsDark((prev) => !prev);
@@ -182,37 +194,7 @@ export const StockProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     fetchData();
-    setOptions((prevValue) => ({
-      ...prevValue,
-      title: {
-        ...prevValue.title,
-        text: `${params.symbol} ${
-          params.resolution[0].toUpperCase() + params.resolution.slice(1)
-        } Stock Data`,
-      },
-      xaxis: {
-        ...prevValue.xaxis,
-        tooltip: {
-          ...prevValue.xaxis?.tooltip,
-          formatter: (value) =>
-            params.resolution === "intraday"
-              ? new Date(value).toLocaleString("en-GB")
-              : new Date(value).toLocaleDateString(),
-        },
-      },
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
-
-  useEffect(() => {
-    setOptions((prevOptions) => ({
-      ...prevOptions,
-      theme: {
-        ...prevOptions.theme,
-        mode: isDark ? "dark" : "light",
-      },
-    }));
-  }, [isDark]);
+  }, [fetchData]);
 
   return (
     <StockContext.Provider

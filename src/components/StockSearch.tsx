@@ -2,14 +2,14 @@ import { Card, IconButton, Input } from "@material-tailwind/react";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import StockContext from "../context/StockContext";
+import { ISymbolSearch } from "../utils/interfaces";
 
 const DEBOUNCE_DELAY = 300;
 
 const StockSearch: React.FC = () => {
   const { isDark, handleSymbolSelect } = useContext(StockContext);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<ISymbolSearch[]>([]);
 
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value as string;
@@ -33,8 +33,7 @@ const StockSearch: React.FC = () => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSelect = (result: any) => {
+  const onSelect = (result: ISymbolSearch) => {
     handleSymbolSelect(result["1. symbol"]);
     setSearchTerm("");
     setSearchResults([]);
