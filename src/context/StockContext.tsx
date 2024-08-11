@@ -187,10 +187,10 @@ export const StockProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   }, []);
 
-  const toggleDarkTheme = () => {
+  const toggleDarkTheme = useCallback(() => {
     setIsDark((prev) => !prev);
     document.body.classList.toggle("dark");
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
